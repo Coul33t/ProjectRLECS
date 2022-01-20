@@ -27,7 +27,14 @@ struct Room {
         this->y = y;
         this->w = w;
         this->h = h;
-    } 
+    }
+
+    mVec2<uint> getCenter() {
+        mVec2<uint> center;
+        center.x = (this->x + this->w) / 2;
+        center.y = (this->y + this->h) / 2;
+        return center;
+    }
 };
 
 class Map {
