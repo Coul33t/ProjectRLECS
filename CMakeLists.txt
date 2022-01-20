@@ -1,0 +1,31 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21)
+
+SET(CMAKE_TOOLCHAIN_FILE
+    "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    CACHE STRING "Vcpkg toolchain file")
+
+PROJECT(ProjectRLECS)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17")
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/extlib/flecs)
+
+FIND_PACKAGE(libtcod CONFIG REQUIRED)
+
+INCLUDE_DIRECTORIES(
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+)
+
+FILE(GLOB all_SRCS
+        "${PROJECT_SOURCE_DIR}/main.cpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+)
+
+ADD_DEFINITIONS(-w)
+
+ADD_EXECUTABLE(ProjectRLECS ${all_SRCS})
+TARGET_LINK_LIBRARIES(ProjectRLECS PRIVATE libtcod::libtcod flecs)
+#TARGET_LINK_LIBRARIES(ProjectRLECS PRIVATE libtcod::libtcod  ${CMAKE_SOURCE_DIR}/extlib/flecs/libflecs_static.a)
