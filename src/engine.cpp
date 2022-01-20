@@ -38,8 +38,8 @@ void Engine::initSystems() {
     // AI system
     ecs_world.system<Position, Velocity, Monster>()
         .kind(flecs::OnUpdate)
-        .each([](flecs::entity e, Position& p, Velocity& v, const Monster& m) {
-
+        .each([](flecs::entity e, Position& p, Velocity& v, const Monster& m, const BasicAI& bai) {
+            
     });
     
     // Move system
