@@ -6,4 +6,5 @@
 
 namespace EntFactories {
     flecs::entity createPlayer(flecs::world& ecs_world, uint x, uint y);
+    flecs::entity createMonster(flecs::world& ecs_world, uint x, uint y, char glyph);
 }
