@@ -8,6 +8,7 @@
 #include "colours.hpp"
 
 #include "components/component.hpp"
+#include "tags/tags.hpp"
 
 class Renderer {
     public:

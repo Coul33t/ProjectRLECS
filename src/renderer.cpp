@@ -48,7 +48,12 @@ void Renderer::renderMap(Map* map, bool debug) {
 }
 
 void Renderer::renderEntities(Map* map, flecs::world& ecs_world) {
-    ecs_world.each([](flecs::entity e, Position& p, Renderable& r) {
-        TCODConsole::root->putCharEx(p.x, p.y, r.glyph, green, default_bg);
+    ecs_world.each([map](flecs::entity e, Position& p, Renderable& r) {
+        if(e.has<Player>())
+            TCODConsole::root->putCharEx(p.x, p.y, r.glyph, green, default_bg);
+        else
+            if(map->isInFov(p.x, p.y))
+                TCODConsole::root->putCharEx(p.x, p.y, r.glyph, red, default_bg);
+        
     });
 }
