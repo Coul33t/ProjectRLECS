@@ -24,6 +24,9 @@ class Engine {
         void initMap(uint w = 40, uint h = 20);
         void initPlayer();
 
+        void populateMap();
+
+        bool isWalkable(uint x, uint y);
         void move(int dx, int dy);
 
         void run();
