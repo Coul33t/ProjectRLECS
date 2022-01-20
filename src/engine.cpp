@@ -104,7 +104,7 @@ void Engine::run() {
         ecs_world.progress();
 
         TCODConsole::root->clear();
-        renderer->renderMap(map, true); // true for debug
+        renderer->renderMap(map, false); // true for debug
         renderer->renderEntities(map, ecs_world);
         TCODConsole::flush();       
     }

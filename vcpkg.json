@@ -1,0 +1,16 @@
+{
+  "name": "project-rl",
+  "version": "0.0.1",
+  "dependencies": [
+    "libtcod",
+    "sdl2",
+    {
+      "name": "sdl2",
+      "default-features": false,
+      "features": [
+        "x11"
+      ],
+      "platform": "linux"
+    }
+  ]
+}
