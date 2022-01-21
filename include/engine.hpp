@@ -27,6 +27,8 @@ class Engine {
         void populateMap();
 
         bool isWalkable(uint x, uint y);
+        bool hasEnemy(uint x, uint y);
+        flecs::entity getEnemyAt(uint x, uint y);
         void move(int dx, int dy);
 
         void run();

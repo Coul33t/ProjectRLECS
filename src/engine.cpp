@@ -33,6 +33,14 @@ void Engine::initSystems() {
                 v->dx = 0;
                 v->dy = 0;
             }
+
+            // attack
+            Melee* m = e.get_mut<Melee>();
+
+            if (m->target != flecs::entity::null()) {
+                std::cout << e.get<Stats>()->name << " attacks the " << m->target.get_ref<Stats>()->name << " !" << std::endl;
+                m->target = flecs::entity::null();
+            }
     });
 
     // AI system
@@ -98,11 +106,37 @@ bool Engine::isWalkable(uint x, uint y) {
     return walkable;
 }
 
+bool Engine::hasEnemy(uint x, uint y) {
+    bool enemy_found = false;
+    
+    ecs_world.each([x, y, &enemy_found](flecs::entity e, const Position& p, const BlocksPath& bp, const Monster& m) {
+        if(p.x == x && p.y == y)
+            enemy_found = true;
+    });
+
+    return enemy_found;
+}
+
+flecs::entity Engine::getEnemyAt(uint x, uint y) {
+    flecs::entity enemy;
+    
+    ecs_world.each([this, x, y, &enemy](flecs::entity e, const Position& p, const BlocksPath& bp, const Monster& m) {
+        if(p.x == x && p.y == y)
+            enemy = e;
+    });
+
+    return enemy;
+}
+
 void Engine::move(int dx, int dy) {
-    ecs_world.each([this, dx, dy](flecs::entity e, const Player, const Position& p, Velocity& v) {
+    ecs_world.each([this, dx, dy](flecs::entity e, const Player, const Position& p, Velocity& v, Melee& m) {
         if(isWalkable(p.x + dx, p.y + dy)) {
             v.dx = dx;
             v.dy = dy;
+        }
+
+        else if (hasEnemy(p.x + dx, p.y + dy)) {
+            m.target = getEnemyAt(p.x + dx, p.y + dy);
         }
     });
 }

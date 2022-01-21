@@ -39,6 +39,8 @@ struct Vision {
 struct Melee {
     uint dmg;
     bool attack_on_move = true;
+    flecs::entity target;
+
     Melee(uint dmg=1, bool attack_on_move=true): 
         dmg(dmg), attack_on_move(attack_on_move) {};
 };
