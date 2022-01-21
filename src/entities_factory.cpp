@@ -7,7 +7,7 @@ namespace EntFactories {
         player.set<Position>({x, y});
         player.add<Velocity>();
         player.set<Vision>(10);
-        player.set<Stats>(20);
+        player.set<Stats>({"Exodius", 20, 20});
         player.set<Melee>(5);
         player.set<Renderable>('@');
         // tags
@@ -22,7 +22,7 @@ namespace EntFactories {
         monster.set<Position>({x, y});
         monster.add<Velocity>();
         monster.set<Vision>(5);
-        monster.set<Stats>(5);
+        monster.set<Stats>({"Generic monster", 5, 5});
         monster.set<Melee>(1);
         monster.set<Renderable>(glyph);
         // tags

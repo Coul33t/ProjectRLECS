@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "../../extlib/flecs/flecs.h"
 
@@ -43,21 +44,41 @@ struct Melee {
 };
 
 struct Stats {
-    int hp;
+    int hp, max_hp;
     bool is_alive = true;
+    std::string name;
 
     Stats() {
         hp = 10;
-        is_alive = true;
+        max_hp = 10;
+        name = "NO NAME ASSIGNED";
     };
 
     Stats(int hp): hp(hp) {
         if(hp < 0)
             is_alive = false;
+        max_hp = hp;
+        name = "NO NAMED ASSIGNED";
     };
 
     Stats(int hp, bool is_alive): 
-        hp(hp), is_alive(is_alive) {};
+        hp(hp), is_alive(is_alive) {
+            max_hp = hp;
+            name = "NO NAMED ASSIGNED"; 
+        };
+
+    Stats(const std::string& name): name(name) {
+        hp = 10;
+        max_hp = 10;
+    }
+
+    Stats(const std::string& name, int hp): name(name), hp(hp) {
+        max_hp = hp;
+        if(hp < 0)
+            is_alive = false;
+    }
+
+    Stats(const std::string& name, int hp, int max_hp): name(name), hp(hp), max_hp(max_hp) {};
 };
 
 struct Renderable {
