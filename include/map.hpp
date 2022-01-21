@@ -31,8 +31,8 @@ struct Room {
 
     mVec2<uint> getCenter() {
         mVec2<uint> center;
-        center.x = (this->x + this->w) / 2;
-        center.y = (this->y + this->h) / 2;
+        center.x = this->x + (this->w / 2);
+        center.y = this->y + (this->h / 2);
         return center;
     }
 };
