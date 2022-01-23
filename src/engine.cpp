@@ -109,7 +109,7 @@ bool Engine::isWalkable(uint x, uint y) {
 bool Engine::hasEnemy(uint x, uint y) {
     bool enemy_found = false;
     
-    ecs_world.each([x, y, &enemy_found](flecs::entity e, const Position& p, const BlocksPath& bp, const Monster& m) {
+    ecs_world.each([x, y, &enemy_found](const Position& p, const BlocksPath& bp, const Monster& m) {
         if(p.x == x && p.y == y)
             enemy_found = true;
     });
@@ -129,7 +129,7 @@ flecs::entity Engine::getEnemyAt(uint x, uint y) {
 }
 
 void Engine::move(int dx, int dy) {
-    ecs_world.each([this, dx, dy](flecs::entity e, const Player, const Position& p, Velocity& v, Melee& m) {
+    ecs_world.each([this, dx, dy](const Player& pl, const Position& p, Velocity& v, Melee& m) {
         if(isWalkable(p.x + dx, p.y + dy)) {
             v.dx = dx;
             v.dy = dy;
