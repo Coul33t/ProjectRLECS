@@ -1,32 +1,24 @@
 #pragma once
 
+#include "../libtcod_no_warnings.hpp"
 #include <vector>
 #include <string>
 
 #include "../../extlib/flecs/flecs.h"
 
 #include "../types.hpp"
+#include "../colours.hpp"
 
 struct Position {
     uint x, y;
-    
-    Position() {
-        x = 0;
-        y = 0;
-    };
 
-    Position(uint x, uint y): x(x), y(y) {};
+    Position(uint x=0, uint y=0): x(x), y(y) {};
 };
 
 struct Velocity {
     int dx, dy;
 
-    Velocity() {
-        dx = 0;
-        dy = 0;
-    }
-
-    Velocity(uint dx, uint dy): dx(dx), dy(dy) {};
+    Velocity(uint dx=0, uint dy=0): dx(dx), dy(dy) {};
 };
 
 struct Vision {
@@ -56,7 +48,7 @@ struct Stats {
         name = "NO NAME ASSIGNED";
     };
 
-    Stats(int hp): hp(hp) {
+    /*Stats(int hp): hp(hp) {
         if(hp < 0)
             is_alive = false;
         max_hp = hp;
@@ -67,24 +59,28 @@ struct Stats {
         hp(hp), is_alive(is_alive) {
             max_hp = hp;
             name = "NO NAMED ASSIGNED"; 
-        };
+    };
 
     Stats(const std::string& name): name(name) {
         hp = 10;
         max_hp = 10;
-    }
+    };
 
     Stats(const std::string& name, int hp): name(name), hp(hp) {
         max_hp = hp;
         if(hp < 0)
             is_alive = false;
-    }
+    };*/
 
     Stats(const std::string& name, int hp, int max_hp): name(name), hp(hp), max_hp(max_hp) {};
 };
 
 struct Renderable {
-    char glyph;
+    char glyph, glyph_dead;
+    TCODColor colour, colour_dead;
+    
+    Renderable() {};
 
-    Renderable(char glyph='X'): glyph(glyph) {};
+    Renderable(char glyph, char glyph_dead='%', TCODColor colour=red, TCODColor colour_dead=dark_red): 
+        glyph(glyph), glyph_dead(glyph_dead), colour(colour), colour_dead(colour_dead) {};
 };
