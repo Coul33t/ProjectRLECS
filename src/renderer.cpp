@@ -48,7 +48,7 @@ void Renderer::renderMap(Map* map, bool debug) {
 }
 
 void Renderer::renderEntities(Map* map, flecs::world& ecs_world) {
-    ecs_world.each([map](flecs::entity e, Position& p, Renderable& r) {
+    ecs_world.each([map](flecs::entity e, const Position& p, const Renderable& r) {
         if(e.has<Player>())
             TCODConsole::root->putCharEx(p.x, p.y, r.glyph, green, default_bg);
         else
