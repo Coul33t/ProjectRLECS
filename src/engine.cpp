@@ -4,6 +4,8 @@ Engine::Engine() {
     renderer = new Renderer();
     map = new Map();
 
+    game_state = GameState::STARTUP;
+
     initRenderer(80, 50);
 }
 
@@ -11,6 +13,8 @@ Engine::Engine(uint w, uint h) {
     renderer = new Renderer();
     map = new Map();
 
+    game_state = GameState::STARTUP;
+    
     initRenderer(w, h);
 }
 
@@ -81,17 +85,29 @@ void Engine::populateMap() {
 
     TCODRandom* rng = TCODRandom::getInstance();
 
+    // Player coordinates
+    const Position* pc = ecs_world.lookup("Player").get<Position>();
+
     for (auto it = rooms.begin(); it != rooms.end(); it++) {
         nb_monsters = rng->getInt(0, max_monster_per_room);
         for (size_t i = 0; i < nb_monsters; i++) {
-            uint x = rng->getInt((*it)->x, (*it)->x + (*it)->w);
-            uint y = rng->getInt((*it)->y, (*it)->y + (*it)->h);
+            uint x, y;
+
+            do {
+                x = rng->getInt((*it)->x, (*it)->x + (*it)->w);
+                y = rng->getInt((*it)->y, (*it)->y + (*it)->h);
+            } while(x == pc->x && y == pc->y);
+
             enemies.push_back(EntFactories::createMonster(ecs_world, x, y, 'x'));
         }
     }
 }
 
 bool Engine::isWalkable(uint x, uint y) {
+    const Position* pp = ecs_world.lookup("Player").get<Position>();
+    if (x == pp->x && y == pp->y)
+        return false;
+
     if(!map->isWalkable(x, y))
         return false;
 
@@ -128,20 +144,27 @@ flecs::entity Engine::getEnemyAt(uint x, uint y) {
     return enemy;
 }
 
-void Engine::move(int dx, int dy) {
+bool Engine::move(int dx, int dy) {
     ecs_world.each([this, dx, dy](const Player& pl, const Position& p, Velocity& v, Melee& m) {
         if(isWalkable(p.x + dx, p.y + dy)) {
             v.dx = dx;
             v.dy = dy;
+            return true;
         }
 
         else if (hasEnemy(p.x + dx, p.y + dy)) {
             m.target = getEnemyAt(p.x + dx, p.y + dy);
+            return true;
         }
     });
+
+    return false;
 }
 
 void Engine::run() {
+    Renderable a, b; 
+    a = std::move(b);
+
     initSystems();
 
     map->createBSPMap();
@@ -158,39 +181,47 @@ void Engine::run() {
     bool compute_fov = false;
     
     while (!TCODConsole::isWindowClosed()) {
+        game_state = GameState::IDLE;
+        
         TCOD_key_t key;
-        TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
+        TCOD_event_t ev = TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
+
+        mVec2<uint> dir;
 
         switch(key.vk) {
             case TCODK_UP :
-                move(0, -1);
-                compute_fov = true;
+                dir.x = 0;
+                dir.y = -1;
                 break;
 
             case TCODK_DOWN :
-                move(0, 1);
-                compute_fov = true;
+                dir.x = 0;
+                dir.y = 1;
                 break;
 
             case TCODK_LEFT :
-                move(-1, 0);
-                compute_fov = true;
+                dir.x = -1;
+                dir.y = 0;
                 break;
             
             case TCODK_RIGHT :
-                move(1, 0);
-                compute_fov = true;
+                dir.x = 1;
+                dir.y = 0;
                 break;
 
             default: break;
         }
 
-        if (compute_fov) {
-            map->computeFov(player);
-            compute_fov = false;
+        if (ev == TCOD_EVENT_KEY_PRESS) {
+            game_state = GameState::TOOK_TURN;
+            move(dir.x, dir.y);
         }
 
-        ecs_world.progress();
+        if (game_state == GameState::TOOK_TURN) {
+            map->computeFov(player);
+            ecs_world.progress();
+        }
+            
 
         TCODConsole::root->clear();
         renderer->renderMap(map, false); // true for debug

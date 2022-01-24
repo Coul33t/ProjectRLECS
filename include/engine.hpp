@@ -11,6 +11,13 @@
 
 #include "entities_factory.hpp"
 
+enum GameState {
+       STARTUP,
+       IDLE,
+       TOOK_TURN,
+       VICTORY,
+       DEFEAT
+};
 
 class Engine {
     public:
@@ -28,7 +35,7 @@ class Engine {
         bool isWalkable(uint x, uint y);
         bool hasEnemy(uint x, uint y);
         flecs::entity getEnemyAt(uint x, uint y);
-        void move(int dx, int dy);
+        bool move(int dx, int dy);
 
         void run();
 
@@ -39,4 +46,6 @@ class Engine {
         flecs::world ecs_world;
         flecs::entity player;
         std::vector<flecs::entity> enemies;
+
+        GameState game_state;
 };
