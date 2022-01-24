@@ -9,7 +9,8 @@ namespace EntFactories {
         player.set<Vision>(10);
         player.set<Stats>({"Exodius", 20, 20});
         player.set<Melee>(5);
-        player.set<Renderable>('@');
+        player.set<Renderable>({'@', '%'});
+
         // tags
         player.add<Player>();
         player.add<BlocksPath>();
@@ -25,6 +26,7 @@ namespace EntFactories {
         monster.set<Stats>({"Generic monster", 5, 5});
         monster.set<Melee>(1);
         monster.set<Renderable>(glyph);
+        
         // tags
         monster.add<Monster>();
         monster.add<BlocksPath>();
