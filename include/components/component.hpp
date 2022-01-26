@@ -48,7 +48,7 @@ struct Stats {
         name = "NO NAME ASSIGNED";
     };
 
-    /*Stats(int hp): hp(hp) {
+    Stats(int hp): hp(hp) {
         if(hp < 0)
             is_alive = false;
         max_hp = hp;
@@ -70,7 +70,7 @@ struct Stats {
         max_hp = hp;
         if(hp < 0)
             is_alive = false;
-    };*/
+    };
 
     Stats(const std::string& name, int hp, int max_hp): name(name), hp(hp), max_hp(max_hp) {};
 };
