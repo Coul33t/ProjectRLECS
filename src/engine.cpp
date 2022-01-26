@@ -42,22 +42,31 @@ void Engine::initSystems() {
             Melee* m = e.get_mut<Melee>();
 
             if (m->target != flecs::entity::null()) {
-                std::cout << e.get<Stats>()->name << " attacks the " << m->target.get_ref<Stats>()->name << " !" << std::endl;
+                Stats* enemy_stats = m->target.mut(e).get_mut<Stats>();
+                std::cout << e.get<Stats>()->name << " attacks the " << enemy_stats->name << " for " << e.get<Melee>()->dmg << " damage !" << std::endl;  
+                enemy_stats->hp -= e.get<Melee>()->dmg;
+                std::cout << enemy_stats->name << "hp: " << enemy_stats->hp << "/" << enemy_stats->max_hp << std::endl;
+                
+                if (enemy_stats->hp <= 0) {
+                    m->target.mut(e).remove<Alive>();                       
+                    m->target.mut(e).add<Dead>();                  
+                }
+
                 m->target = flecs::entity::null();
             }
     });
 
     // AI system
-    ecs_world.system<Position, Velocity, Monster, BasicAI>()
+    ecs_world.system<Position, Velocity, Monster, BasicAI, Alive>()
         .kind(flecs::OnUpdate)
-        .each([](flecs::entity e, Position& p, Velocity& v, const Monster& m, const BasicAI& bai) {
+        .each([](flecs::entity e, Position& p, Velocity& v, const Monster& m, const BasicAI& bai, Alive& a) {
             
     });
     
     // Move system
-    ecs_world.system<Position, Velocity>()
+    ecs_world.system<Position, Velocity, Alive>()
         .kind(flecs::OnUpdate)
-        .each([](flecs::entity e, Position& p, Velocity& v) {
+        .each([](flecs::entity e, Position& p, Velocity& v, const Alive& a) {
             if (v.dx != 0 || v.dy != 0) {
                 p.x += v.dx;
                 p.y += v.dy;
@@ -88,17 +97,34 @@ void Engine::populateMap() {
     // Player coordinates
     const Position* pc = ecs_world.lookup("Player").get<Position>();
 
+    const uint max_tries_per_monster = 100;
+    uint current_tries = 0;
+
     for (auto it = rooms.begin(); it != rooms.end(); it++) {
         nb_monsters = rng->getInt(0, max_monster_per_room);
+        
         for (size_t i = 0; i < nb_monsters; i++) {
             uint x, y;
+            bool has_enemy = false;
+            current_tries = 0;
 
             do {
+                current_tries++;
+                has_enemy = false;
+
                 x = rng->getInt((*it)->x, (*it)->x + (*it)->w);
                 y = rng->getInt((*it)->y, (*it)->y + (*it)->h);
-            } while(x == pc->x && y == pc->y);
 
-            enemies.push_back(EntFactories::createMonster(ecs_world, x, y, 'x'));
+                ecs_world.each([&has_enemy, &x, &y](const Position& p, const Monster& m) { // flecs::entity argument is optional
+                    if (p.x == x && p.y == y) {
+                        has_enemy = true;
+                    }
+                });
+
+            } while((has_enemy || (x == pc->x && y == pc->y)) && current_tries < max_tries_per_monster);
+
+            if (current_tries < max_tries_per_monster)
+                EntFactories::createMonster(ecs_world, x, y, 'x');
         }
     }
 }
@@ -113,7 +139,8 @@ bool Engine::isWalkable(uint x, uint y) {
 
     bool walkable = true;
 
-    ecs_world.each([x, y, &walkable](flecs::entity e, const Position& p, const BlocksPath& bp) {
+    // If the entity blocks path, is alive and position == next move, can't go there
+    ecs_world.each([x, y, &walkable](flecs::entity e, const Position& p, const BlocksPath& bp, const Alive& a) {
         if (!e.has<Player>())
             if(p.x == x && p.y == y)
                 walkable = false;
