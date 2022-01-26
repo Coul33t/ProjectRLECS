@@ -48,12 +48,29 @@ void Renderer::renderMap(Map* map, bool debug) {
 }
 
 void Renderer::renderEntities(Map* map, flecs::world& ecs_world) {
-    ecs_world.each([map](flecs::entity e, const Position& p, const Renderable& r) {
-        if(e.has<Player>())
-            TCODConsole::root->putCharEx(p.x, p.y, r.glyph, green, default_bg);
-        else
-            if(map->isInFov(p.x, p.y))
-                TCODConsole::root->putCharEx(p.x, p.y, r.glyph, red, default_bg);
-        
+    // Draw the dead entities first (so they are under everything else)
+    ecs_world.each([map](flecs::entity e, const Position& p, const Renderable& r, const Dead& d) {
+        if(map->isInFov(p.x, p.y)) {
+            TCODConsole::root->putCharEx(p.x, p.y, r.glyph_dead, r.colour_dead, default_bg);
+        }
+          
     });
+
+    // Draw the entities, except for the player
+    ecs_world.each([map](flecs::entity e, const Position& p, const Renderable& r, const Alive& a) {
+        if(!e.has<Player>()) {
+            if(map->isInFov(p.x, p.y)) {
+                TCODConsole::root->putCharEx(p.x, p.y, r.glyph, r.colour, default_bg); 
+            }
+        }  
+    });
+
+    // TODO: maybe draw the non-living entities (furnitures, etc.) first, then the living ones?
+
+    
+    // Draw the player the last so it's always on the top of everything
+    flecs::entity player = ecs_world.lookup("Player");
+    const Position* p = player.get<Position>();
+    const Renderable* r = player.get<Renderable>();
+    TCODConsole::root->putCharEx(p->x, p->y, r->glyph, r->colour, default_bg);
 }
