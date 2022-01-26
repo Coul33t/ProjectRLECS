@@ -45,7 +45,6 @@ class Engine {
 
         flecs::world ecs_world;
         flecs::entity player;
-        std::vector<flecs::entity> enemies;
 
         GameState game_state;
 };
