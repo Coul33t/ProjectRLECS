@@ -32,11 +32,11 @@ Map::~Map() {
     delete tcod_map;
 }
 
-Tile* Map::getTile(uint x, uint y) {
+Tile* Map::getTile(uint x, uint y) const {
     return map[coordinates2dto1d(x, y)];
 }
 
-Room* Map::getRoom(uint idx) {
+Room* Map::getRoom(uint idx)  const {
     if (idx > rooms.size() - 1) {
         std::cout << "WARNING: idx is bigger than size of rooms vector. Returning last room instead." << std::endl;
         return rooms.back();
@@ -61,7 +61,7 @@ void Map::setSize(uint w, uint h) {
     tcod_map = new TCODMap(size.w, size.h);
 }
 
-uint Map::coordinates2dto1d(uint x, uint y) {
+uint Map::coordinates2dto1d(uint x, uint y) const {
     return (size.w * y + x);
 }
 
@@ -76,11 +76,11 @@ void Map::setFloor(uint x, uint y) {
     tcod_map->setProperties(x, y, true, true);
 }
 
-bool Map::isWalkable(uint x, uint y) {
+bool Map::isWalkable(uint x, uint y)  const {
     return map[coordinates2dto1d(x, y)]->walkable;
 }
 
-bool Map::isExplored(uint x, uint y) {
+bool Map::isExplored(uint x, uint y)  const {
     return map[coordinates2dto1d(x, y)]->explored;
 }
 

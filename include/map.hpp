@@ -44,21 +44,21 @@ class Map {
 
         ~Map();
 
-        Room* getRoom(uint idx);
+        Room* getRoom(uint idx)  const;
         const std::vector<Room*>& getRooms() const;
 
         void setSize(uint w, uint h);
 
-        Tile* getTile(uint x, uint y);
+        Tile* getTile(uint x, uint y) const;
 
-        uint coordinates2dto1d(uint x, uint y);
+        uint coordinates2dto1d(uint x, uint y)  const;
 
         void setWall(uint x, uint y);
         void setFloor(uint x, uint y);
 
-        bool isWalkable(uint x, uint y);
+        bool isWalkable(uint x, uint y) const;
+        bool isExplored(uint x, uint y) const;
         bool isInFov(uint x, uint y);
-        bool isExplored(uint x, uint y);
 
         void computeFov(uint x, uint y, uint vision_radius);
         void computeFov(flecs::entity player);
