@@ -13,24 +13,24 @@ void Renderer::initConsole(uint w, uint h) {
     TCODConsole::initRoot(w, h, "my game", false);
 }
 
-void Renderer::renderTile(Map* map, uint x, uint y, bool debug) {
+void Renderer::renderTile(Map& map, uint x, uint y, bool debug) {
     if (debug) {
-        if (map->isWalkable(x, y))
+        if (map.isWalkable(x, y))
             TCODConsole::root->putCharEx(x, y, '.', light_ground, default_bg);
         else
             TCODConsole::root->putCharEx(x, y, '#', light_wall, default_bg);
     }
 
     else {
-        if(map->isInFov(x, y)) {   
-            if (map->isWalkable(x, y))
+        if(map.isInFov(x, y)) {   
+            if (map.isWalkable(x, y))
                 TCODConsole::root->putCharEx(x, y, '.', light_ground, default_bg);
             else
                 TCODConsole::root->putCharEx(x, y, '#', light_wall, default_bg);
         }
 
-        else if(map->isExplored(x, y)) {
-            if (map->isWalkable(x, y))
+        else if(map.isExplored(x, y)) {
+            if (map.isWalkable(x, y))
                 TCODConsole::root->putCharEx(x, y, '.', dark_ground, default_bg);
             else
                 TCODConsole::root->putCharEx(x, y, '#', dark_wall, default_bg);
@@ -39,27 +39,27 @@ void Renderer::renderTile(Map* map, uint x, uint y, bool debug) {
     }
 }
 
-void Renderer::renderMap(Map* map, bool debug) {
-    for(size_t y = 0; y < map->size.h; y++) {
-        for (size_t x = 0; x < map->size.w; x++) {
+void Renderer::renderMap(Map& map, bool debug) {
+    for(size_t y = 0; y < map.size.h; y++) {
+        for (size_t x = 0; x < map.size.w; x++) {
             renderTile(map, x, y, debug);
         }
     }
 }
 
-void Renderer::renderEntities(Map* map, flecs::world& ecs_world) {
+void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
     // Draw the dead entities first (so they are under everything else)
-    ecs_world.each([map](flecs::entity e, const Position& p, const Renderable& r, const Dead& d) {
-        if(map->isInFov(p.x, p.y)) {
+    ecs_world.each([&map](flecs::entity e, const Position& p, const Renderable& r, const Dead& d) {
+        if(map.isInFov(p.x, p.y)) {
             TCODConsole::root->putCharEx(p.x, p.y, r.glyph_dead, r.colour_dead, default_bg);
         }
           
     });
 
     // Draw the entities, except for the player
-    ecs_world.each([map](flecs::entity e, const Position& p, const Renderable& r, const Alive& a) {
+    ecs_world.each([&map](flecs::entity e, const Position& p, const Renderable& r, const Alive& a) {
         if(!e.has<Player>()) {
-            if(map->isInFov(p.x, p.y)) {
+            if(map.isInFov(p.x, p.y)) {
                 TCODConsole::root->putCharEx(p.x, p.y, r.glyph, r.colour, default_bg); 
             }
         }  

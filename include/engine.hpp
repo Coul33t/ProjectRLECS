@@ -7,6 +7,7 @@
 #include "../extlib/flecs/flecs.h"
 
 #include "map.hpp"
+#include "gui.hpp"
 #include "renderer.hpp"
 
 #include "entities_factory.hpp"
@@ -40,8 +41,8 @@ class Engine {
         void run();
 
 
-        Map* map;
-        Renderer* renderer;
+        Map map;
+        Renderer renderer;
 
         flecs::world ecs_world;
         flecs::entity player;

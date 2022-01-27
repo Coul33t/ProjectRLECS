@@ -17,9 +17,9 @@ class Renderer {
 
         void initConsole(uint w, uint h);
 
-        void renderTile(Map* map, uint x, uint y, bool debug);
+        void renderTile(Map& map, uint x, uint y, bool debug);
 
-        void renderMap(Map* map, bool debug=false);
+        void renderMap(Map& map, bool debug=false);
 
-        void renderEntities(Map* map, flecs::world& ecs_world);
+        void renderEntities(Map& map, flecs::world& ecs_world);
 };

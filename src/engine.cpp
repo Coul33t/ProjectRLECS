@@ -1,26 +1,19 @@
 #include "../include/engine.hpp"
 
 Engine::Engine() {
-    renderer = new Renderer();
-    map = new Map();
-
     game_state = GameState::STARTUP;
 
     initRenderer(80, 50);
 }
 
 Engine::Engine(uint w, uint h) {
-    renderer = new Renderer();
-    map = new Map();
-
     game_state = GameState::STARTUP;
     
     initRenderer(w, h);
 }
 
 Engine::~Engine() {
-    delete map;
-    delete renderer;
+
 }
 
 void Engine::initSystems() {
@@ -78,19 +71,19 @@ void Engine::initSystems() {
 }
 
 void Engine::initRenderer(uint w, uint h) {
-    renderer->initConsole(w, h);
+    renderer.initConsole(w, h);
 }
 
 
 void Engine::initMap(uint w, uint h) {
-    map->setSize(w, h);
+    map.setSize(w, h);
 }
 
 void Engine::populateMap() {
     const uint max_monster_per_room = 5;
     uint nb_monsters = 0;
 
-    std::vector<Room*> rooms = map->getRooms();
+    std::vector<Room*> rooms = map.getRooms();
 
     TCODRandom* rng = TCODRandom::getInstance();
 
@@ -134,7 +127,7 @@ bool Engine::isWalkable(uint x, uint y) {
     if (x == pp->x && y == pp->y)
         return false;
 
-    if(!map->isWalkable(x, y))
+    if(!map.isWalkable(x, y))
         return false;
 
     bool walkable = true;
@@ -194,16 +187,16 @@ void Engine::run() {
 
     initSystems();
 
-    map->createBSPMap();
+    map.createBSPMap();
 
     uint x = 0;
     uint y = 0;
-    mVec2<uint> center = map->getRoom(0)->getCenter();
+    mVec2<uint> center = map.getRoom(0)->getCenter();
 
     player = EntFactories::createPlayer(ecs_world, center.x, center.y);
     populateMap();
 
-    map->computeFov(player);
+    map.computeFov(player);
 
     bool compute_fov = false;
     
@@ -245,14 +238,14 @@ void Engine::run() {
         }
 
         if (game_state == GameState::TOOK_TURN) {
-            map->computeFov(player);
+            map.computeFov(player);
             ecs_world.progress();
         }
             
 
         TCODConsole::root->clear();
-        renderer->renderMap(map, false); // true for debug
-        renderer->renderEntities(map, ecs_world);
+        renderer.renderMap(map, false); // true for debug
+        renderer.renderEntities(map, ecs_world);
         TCODConsole::flush();       
     }
 }
