@@ -7,10 +7,14 @@ Renderer::Renderer() {
 
 Renderer::Renderer(uint w, uint h) {
     TCODConsole::initRoot(w, h, "my game", false);
+    position_map.x = MAP_POSITION_X;
+    position_map.y = MAP_POSITION_Y;
 }
 
 void Renderer::initConsole(uint w, uint h) {
     TCODConsole::initRoot(w, h, "my game", false);
+    position_map.x = MAP_POSITION_X;
+    position_map.y = MAP_POSITION_Y;
 }
 
 void Renderer::renderTile(Map& map, uint x, uint y, bool debug) {
@@ -73,4 +77,17 @@ void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
     const Position* p = player.get<Position>();
     const Renderable* r = player.get<Renderable>();
     TCODConsole::root->putCharEx(p->x, p->y, r->glyph, r->colour, default_bg);
+}
+
+void renderGUIs() {
+    gui_messages.render(true);
+    gui_stats.render(true);
+    
+    TCODConsole::blit(gui_messages.con, 0, 0, 
+                      gui_messages.size.w, gui_messages.size.h, TCODConsole::root, 
+                      gui_messages.pos.x, gui_messages.pos.y);
+
+    TCODConsole::blit(gui_stats.con, 0, 0, 
+                      gui_stats.size.w, gui_stats.size.h, TCODConsole::root, 
+                      gui_stats.pos.x, gui_stats.pos.y);
 }

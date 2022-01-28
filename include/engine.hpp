@@ -29,7 +29,7 @@ class Engine {
 
         void initSystems();
         void initRenderer(uint w = 80, uint h = 50);
-        void initMap(uint w = 40, uint h = 20);
+        void initMap(uint w = 50, uint h = 30);
 
         void populateMap();
 

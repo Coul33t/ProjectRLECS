@@ -51,7 +51,7 @@ class Map {
 
         Tile* getTile(uint x, uint y) const;
 
-        uint coordinates2dto1d(uint x, uint y)  const;
+        uint coordinates2dto1d(uint x, uint y) const;
 
         void setWall(uint x, uint y);
         void setFloor(uint x, uint y);

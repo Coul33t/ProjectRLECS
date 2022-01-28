@@ -10,6 +10,14 @@
 #include "components/component.hpp"
 #include "tags/tags.hpp"
 
+const uint MAP_POSITION_X = 0;
+const uint MAP_POSITION_Y = 0;
+
+const uint MESSAGES_POSITION_X = 0;
+const uint MESSAGES_POSITION_Y = 30;
+
+const uint STATS_POSITION_X = 0;
+const uint STATS_POSITION_Y = 30;
 class Renderer {
     public:
         Renderer();
@@ -22,4 +30,8 @@ class Renderer {
         void renderMap(Map& map, bool debug=false);
 
         void renderEntities(Map& map, flecs::world& ecs_world);
+
+        void renderGUIs();
+
+        Gui gui_map, gui_messages, gui_stats;
 };
