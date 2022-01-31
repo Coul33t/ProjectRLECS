@@ -246,6 +246,7 @@ void Engine::run() {
         TCODConsole::root->clear();
         renderer.renderMap(map, false); // true for debug
         renderer.renderEntities(map, ecs_world);
+        renderer.renderGUIs();
         TCODConsole::flush();       
     }
 }
