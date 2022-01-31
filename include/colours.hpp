@@ -3,6 +3,9 @@
 
 static const TCODColor default_bg(0, 0, 0);
 
+static const TCODColor black(0, 0, 0);
+static const TCODColor white(255, 255, 255);
+
 static const TCODColor light_wall(130, 110, 50);
 static const TCODColor light_ground(200, 180, 50);
 
