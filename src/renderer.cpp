@@ -3,18 +3,17 @@
 
 Renderer::Renderer() {
     TCODConsole::initRoot(80, 50, "my game", false);
+    gui_map.setGuiAttributes("Map_Gui", MAP_POSITION_X, MAP_POSITION_Y, MAP_SIZE_W, MAP_SIZE_H);
+    gui_stats.setGuiAttributes("Stats_Gui", STATS_POSITION_X, STATS_POSITION_Y, STATS_SIZE_W, STATS_SIZE_H);
+    gui_messages.setGuiAttributes("Messages_Gui", MESSAGES_POSITION_X, MESSAGES_POSITION_Y, MESSAGES_SIZE_W, MESSAGES_SIZE_H);
 }
 
 Renderer::Renderer(uint w, uint h) {
     TCODConsole::initRoot(w, h, "my game", false);
-    position_map.x = MAP_POSITION_X;
-    position_map.y = MAP_POSITION_Y;
 }
 
 void Renderer::initConsole(uint w, uint h) {
     TCODConsole::initRoot(w, h, "my game", false);
-    position_map.x = MAP_POSITION_X;
-    position_map.y = MAP_POSITION_Y;
 }
 
 void Renderer::renderTile(Map& map, uint x, uint y, bool debug) {
@@ -79,15 +78,8 @@ void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
     TCODConsole::root->putCharEx(p->x, p->y, r->glyph, r->colour, default_bg);
 }
 
-void renderGUIs() {
+void Renderer::renderGUIs() {
+    gui_map.render(true);
     gui_messages.render(true);
     gui_stats.render(true);
-    
-    TCODConsole::blit(gui_messages.con, 0, 0, 
-                      gui_messages.size.w, gui_messages.size.h, TCODConsole::root, 
-                      gui_messages.pos.x, gui_messages.pos.y);
-
-    TCODConsole::blit(gui_stats.con, 0, 0, 
-                      gui_stats.size.w, gui_stats.size.h, TCODConsole::root, 
-                      gui_stats.pos.x, gui_stats.pos.y);
 }
