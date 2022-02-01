@@ -235,11 +235,13 @@ void Engine::run() {
         if (ev == TCOD_EVENT_KEY_PRESS) {
             game_state = GameState::TOOK_TURN;
             move(dir.x, dir.y);
+            dir.x = 0;
+            dir.y = 0;
         }
 
         if (game_state == GameState::TOOK_TURN) {
-            map.computeFov(player);
             ecs_world.progress();
+            map.computeFov(player);
         }
             
 
