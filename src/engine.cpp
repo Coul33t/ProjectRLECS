@@ -71,7 +71,7 @@ void Engine::initSystems() {
 }
 
 void Engine::initRenderer(uint w, uint h) {
-    renderer.setConsole(h, w);
+    renderer.setConsole(w, h);
 }
 
 
