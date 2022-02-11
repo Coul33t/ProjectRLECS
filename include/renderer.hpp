@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "libtcod_no_warnings.hpp"
+#include "BearLibTerminal.h"
 
 #include "map.hpp"
 #include "colours.hpp"
@@ -30,16 +31,23 @@ class Renderer {
     public:
         Renderer();
         Renderer(uint w, uint h);
+        ~Renderer();
 
         void initConsole(uint w, uint h);
+        void setConsole(uint w, uint h);
 
+        void renderChar(uint x, uint y, char chr,color_t fg, color_t bg);
+        void renderString(uint x, uint y, std::string str, color_t fg, color_t bg);
         void renderTile(Map& map, uint x, uint y, bool debug);
 
         void renderMap(Map& map, bool debug=false);
 
         void renderEntities(Map& map, flecs::world& ecs_world);
 
+        void renderStats();
+        void renderMessages();
+
         void renderGUIs();
 
-        Gui gui_map, gui_messages, gui_stats;
+        Gui gui_messages, gui_stats;
 };

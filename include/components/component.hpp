@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../libtcod_no_warnings.hpp"
+#include "BearLibTerminal.h"
+
 #include <vector>
 #include <string>
 
@@ -77,10 +79,10 @@ struct Stats {
 
 struct Renderable {
     char glyph, glyph_dead;
-    TCODColor colour, colour_dead;
+    color_t colour, colour_dead;
     
     Renderable() {};
 
-    Renderable(char glyph, char glyph_dead='%', TCODColor colour=red, TCODColor colour_dead=dark_red): 
+    Renderable(char glyph, char glyph_dead='%', color_t colour=red, color_t colour_dead=dark_red): 
         glyph(glyph), glyph_dead(glyph_dead), colour(colour), colour_dead(colour_dead) {};
 };

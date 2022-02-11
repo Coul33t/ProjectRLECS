@@ -1,19 +1,23 @@
 #pragma once
 #include "libtcod_no_warnings.hpp"
+#include "BearLibTerminal.h"
 
-static const TCODColor default_bg(0, 0, 0);
+static const color_t default_bg = color_from_name("black");
 
-static const TCODColor black(0, 0, 0);
-static const TCODColor white(255, 255, 255);
+static const color_t black = color_from_name("black");
+static const color_t white = color_from_name("white");
 
-static const TCODColor light_wall(130, 110, 50);
-static const TCODColor light_ground(200, 180, 50);
+static const color_t light_wall = color_from_argb(255, 130, 110, 50);
+static const color_t light_ground = color_from_argb(255, 200, 180, 50);
 
-static const TCODColor dark_wall(32, 22, 12);
-static const TCODColor dark_ground(50, 45, 12);
+static const color_t dark_wall = color_from_argb(255, 32, 22, 12);
+static const color_t dark_ground = color_from_argb(255, 50, 45, 12);
 
-static const TCODColor green(0, 255, 0);
-static const TCODColor dark_green(0, 100, 0);
+static const color_t green = color_from_argb(255, 0, 255, 0);
+static const color_t dark_green = color_from_argb(255, 0, 100, 0);
 
-static const TCODColor red(255, 0, 0);
-static const TCODColor dark_red(100, 0, 0);
+static const color_t red = color_from_argb(255, 255, 0, 0);
+static const color_t dark_red = color_from_argb(255, 100, 0, 0);
+
+static const color_t blue = color_from_argb(255, 0, 0, 255);
+static const color_t dark_blue = color_from_argb(255, 0, 0, 100);

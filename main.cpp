@@ -8,8 +8,6 @@ int main() {
     std::cout << "Hello world!" << std::endl;
     
     Engine engine;
-    engine.initRenderer();
-    engine.initMap();
     engine.run();
 
     return 0;

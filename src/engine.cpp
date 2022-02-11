@@ -13,7 +13,7 @@ Engine::Engine(uint w, uint h) {
 }
 
 Engine::~Engine() {
-
+    
 }
 
 void Engine::initSystems() {
@@ -71,7 +71,7 @@ void Engine::initSystems() {
 }
 
 void Engine::initRenderer(uint w, uint h) {
-    renderer.initConsole(w, h);
+    renderer.setConsole(h, w);
 }
 
 
@@ -182,9 +182,7 @@ bool Engine::move(int dx, int dy) {
 }
 
 void Engine::run() {
-    Renderable a, b; 
-    a = std::move(b);
-
+    initMap();
     initSystems();
 
     map.createBSPMap();
@@ -199,14 +197,18 @@ void Engine::run() {
     map.computeFov(player);
 
     bool compute_fov = false;
+
+    terminal_refresh();
     
-    while (!TCODConsole::isWindowClosed()) {
+    while (terminal_read() != TK_CLOSE) {
         game_state = GameState::IDLE;
         
         TCOD_key_t key;
         TCOD_event_t ev = TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
 
         mVec2<uint> dir;
+        dir.x = 0;
+        dir.y = 0;
 
         switch(key.vk) {
             case TCODK_UP :
@@ -243,12 +245,12 @@ void Engine::run() {
             ecs_world.progress();
             map.computeFov(player);
         }
-            
-
+        
         TCODConsole::root->clear();
         renderer.renderMap(map, false); // true for debug
         renderer.renderEntities(map, ecs_world);
         renderer.renderGUIs();
-        TCODConsole::flush();       
+
+        terminal_refresh();
     }
 }

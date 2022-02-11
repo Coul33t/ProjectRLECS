@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "libtcod_no_warnings.hpp"
+#include "BearLibTerminal.h"
 
 #include "../extlib/flecs/flecs.h"
 
