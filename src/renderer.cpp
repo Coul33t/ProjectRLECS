@@ -7,6 +7,7 @@ Renderer::Renderer() {
     //TCODConsole::initRoot(80, 50, "my game", false);
     gui_stats.setGuiAttributes("Stats_Gui", STATS_POSITION_X, STATS_POSITION_Y, STATS_SIZE_W, STATS_SIZE_H);
     gui_messages.setGuiAttributes("Messages_Gui", MESSAGES_POSITION_X, MESSAGES_POSITION_Y, MESSAGES_SIZE_W, MESSAGES_SIZE_H);
+    gui_info.setGuiAttributes("Info_Gui", INFO_POSITION_X, INFO_POSITION_Y, INFO_SIZE_W, INFO_SIZE_H);
 }
 
 Renderer::Renderer(uint w, uint h) {
@@ -24,7 +25,7 @@ void Renderer::initConsole(uint w, uint h) {
     //terminal_set("title='Project RLECS'");
     terminal_set("font: default");
     terminal_set("input: filter={keyboard}");
-    terminal_color("white");
+    terminal_color("black");
 }
 
 void Renderer::setConsole(uint w, uint h) {
@@ -48,35 +49,31 @@ void Renderer::renderTile(Map& map, uint x, uint y, bool debug) {
     if (debug) {
         if (map.isWalkable(x, y))
             renderChar(x, y, '.', light_ground, default_bg);
-            //TCODConsole::root->putCharEx(x, y, '.', light_ground, default_bg);
         else
             renderChar(x, y, '#', light_wall, default_bg);
-            //TCODConsole::root->putCharEx(x, y, '#', light_wall, default_bg);
     }
 
     else {
         if(map.isInFov(x, y)) {   
             if (map.isWalkable(x, y))
                 renderChar(x, y, '.', light_ground, default_bg);
-                //TCODConsole::root->putCharEx(x, y, '.', light_ground, default_bg);
             else
                 renderChar(x, y, '#', light_wall, default_bg);
-                //TCODConsole::root->putCharEx(x, y, '#', light_wall, default_bg);
         }
 
         else if(map.isExplored(x, y)) {
             if (map.isWalkable(x, y))
                 renderChar(x, y, '.', dark_ground, default_bg);
-                //TCODConsole::root->putCharEx(x, y, '.', dark_ground, default_bg);
             else
-                renderChar(x, y, '.', dark_wall, default_bg);
-                //TCODConsole::root->putCharEx(x, y, '#', dark_wall, default_bg);
+                renderChar(x, y, '#', dark_wall, default_bg);
 
         }
     }
 }
 
 void Renderer::renderMap(Map& map, bool debug) {
+    terminal_bkcolor(black);
+
     for(size_t y = 0; y < map.size.h; y++) {
         for (size_t x = 0; x < map.size.w; x++) {
             renderTile(map, x, y, debug);
@@ -89,7 +86,6 @@ void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
     ecs_world.each([&map, this](flecs::entity e, const Position& p, const Renderable& r, const Dead& d) {
         if(map.isInFov(p.x, p.y)) {
             renderChar(p.x, p.y, r.glyph_dead, r.colour_dead, default_bg);
-            //TCODConsole::root->putCharEx(p.x, p.y, r.glyph_dead, r.colour_dead, default_bg);
         }
           
     });
@@ -99,7 +95,6 @@ void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
         if(!e.has<Player>()) {
             if(map.isInFov(p.x, p.y)) {
                 renderChar(p.x, p.y, r.glyph, r.colour, default_bg);
-                //TCODConsole::root->putCharEx(p.x, p.y, r.glyph, r.colour, default_bg); 
             }
         }  
     });
@@ -112,12 +107,11 @@ void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
     const Position* p = player.get<Position>();
     const Renderable* r = player.get<Renderable>();
     renderChar(p->x, p->y, r->glyph, r->colour, default_bg);
-    //TCODConsole::root->putCharEx(p->x, p->y, r->glyph, r->colour, default_bg);
 }
 
 void Renderer::renderStats() {
     // Render the bars
-    for (auto it_bar = gui_stats.bars.begin(); it_bar != gui_stats.bars.end(); it_bar++) {
+    /*for (auto it_bar = gui_stats.bars.begin(); it_bar != gui_stats.bars.end(); it_bar++) {
         std::string bg_bar = ((*it_bar).width, " ");
         renderString((*it_bar).x + gui_stats.pos.x, (*it_bar).y + gui_stats.pos.y, bg_bar, (*it_bar).bg, (*it_bar).bg);     
         
@@ -125,16 +119,35 @@ void Renderer::renderStats() {
 
         std::string fg_bar = (fill_width, " ");
         renderString((*it_bar).x + gui_stats.pos.x, (*it_bar).y + gui_stats.pos.y, fg_bar, (*it_bar).bg, (*it_bar).bg);     
+    }*/
+
+    for (size_t y = gui_stats.pos.y; y < gui_stats.pos.y + gui_stats.size.h; y++) {
+        for (size_t x = gui_stats.pos.x; x < gui_stats.pos.x + gui_stats.size.w; x++) {
+            renderChar(x, y, 'X', red, white);
+        }
     }
 }
 
 void Renderer::renderMessages() {
-    //renderString();
+    for (size_t y = gui_messages.pos.y; y < gui_messages.pos.y + gui_messages.size.h; y++) {
+        for (size_t x = gui_messages.pos.x; x < gui_messages.pos.x + gui_messages.size.w; x++) {
+            renderChar(x, y, 'X', green, white);
+        }
+    }
+}
+
+void Renderer::renderInfo() {
+    for (size_t y = gui_info.pos.y; y < gui_info.pos.y + gui_info.size.h; y++) {
+        for (size_t x = gui_info.pos.x; x < gui_info.pos.x + gui_info.size.w; x++) {
+            renderChar(x, y, 'X', blue, white);
+        }
+    }
 }
 
 void Renderer::renderGUIs() {
     renderStats();
     renderMessages();
+    renderInfo();
     /*TCODConsole::blit(gui_messages.con, 0, 0, gui_messages.size.w, gui_messages.size.h, 
                       TCODConsole::root, 0, 0);*/
 }

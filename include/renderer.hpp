@@ -27,6 +27,11 @@ const uint STATS_POSITION_Y = 0;
 const uint STATS_SIZE_W = 30;
 const uint STATS_SIZE_H = 30;
 
+const uint INFO_POSITION_X = 50;
+const uint INFO_POSITION_Y = 30;
+const uint INFO_SIZE_W = 30;
+const uint INFO_SIZE_H = 20;
+
 class Renderer {
     public:
         Renderer();
@@ -46,8 +51,9 @@ class Renderer {
 
         void renderStats();
         void renderMessages();
+        void renderInfo();
 
         void renderGUIs();
 
-        Gui gui_messages, gui_stats;
+        Gui gui_messages, gui_stats, gui_info;
 };

@@ -199,34 +199,39 @@ void Engine::run() {
     bool compute_fov = false;
 
     terminal_refresh();
+
+    int key;
+    bool key_pressed = false;
     
-    while (terminal_read() != TK_CLOSE) {
+    while (terminal_peek() != TK_CLOSE) {
         game_state = GameState::IDLE;
         
-        TCOD_key_t key;
-        TCOD_event_t ev = TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
+        if (terminal_has_input()) {
+            key = terminal_read();
+            key_pressed = true;
+        }
 
         mVec2<uint> dir;
         dir.x = 0;
         dir.y = 0;
 
-        switch(key.vk) {
-            case TCODK_UP :
+        switch(key) {
+            case TK_UP :
                 dir.x = 0;
                 dir.y = -1;
                 break;
 
-            case TCODK_DOWN :
+            case TK_DOWN :
                 dir.x = 0;
                 dir.y = 1;
                 break;
 
-            case TCODK_LEFT :
+            case TK_LEFT :
                 dir.x = -1;
                 dir.y = 0;
                 break;
             
-            case TCODK_RIGHT :
+            case TK_RIGHT :
                 dir.x = 1;
                 dir.y = 0;
                 break;
@@ -234,11 +239,12 @@ void Engine::run() {
             default: break;
         }
 
-        if (ev == TCOD_EVENT_KEY_PRESS) {
+        if (key_pressed) {
             game_state = GameState::TOOK_TURN;
             move(dir.x, dir.y);
             dir.x = 0;
             dir.y = 0;
+            key_pressed = false;
         }
 
         if (game_state == GameState::TOOK_TURN) {
@@ -246,7 +252,6 @@ void Engine::run() {
             map.computeFov(player);
         }
         
-        TCODConsole::root->clear();
         renderer.renderMap(map, false); // true for debug
         renderer.renderEntities(map, ecs_world);
         renderer.renderGUIs();
