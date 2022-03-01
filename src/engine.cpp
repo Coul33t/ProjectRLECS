@@ -165,20 +165,22 @@ flecs::entity Engine::getEnemyAt(uint x, uint y) {
 }
 
 bool Engine::move(int dx, int dy) {
-    ecs_world.each([this, dx, dy](const Player& pl, const Position& p, Velocity& v, Melee& m) {
+    bool has_moved = false;
+
+    ecs_world.each([this, dx, dy, &has_moved](const Player& pl, const Position& p, Velocity& v, Melee& m) {
         if(isWalkable(p.x + dx, p.y + dy)) {
             v.dx = dx;
             v.dy = dy;
-            return true;
+            has_moved = true;
         }
 
         else if (hasEnemy(p.x + dx, p.y + dy)) {
             m.target = getEnemyAt(p.x + dx, p.y + dy);
-            return true;
+            has_moved = true;
         }
     });
-
-    return false;
+    
+    return has_moved;
 }
 
 void Engine::run() {
@@ -202,9 +204,12 @@ void Engine::run() {
 
     int key;
     bool key_pressed = false;
+    bool has_moved = false;
     
     while (terminal_peek() != TK_CLOSE) {
         game_state = GameState::IDLE;
+
+        key = 0; //TODO: check if 0 is ok
         
         if (terminal_has_input()) {
             key = terminal_read();
@@ -239,12 +244,14 @@ void Engine::run() {
             default: break;
         }
 
-        if (key_pressed) {
+        has_moved = move(dir.x, dir.y);
+
+        if (has_moved) {
             game_state = GameState::TOOK_TURN;
-            move(dir.x, dir.y);
             dir.x = 0;
             dir.y = 0;
             key_pressed = false;
+            has_moved = false;
         }
 
         if (game_state == GameState::TOOK_TURN) {
