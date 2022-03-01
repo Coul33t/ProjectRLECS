@@ -23,7 +23,7 @@ void Renderer::initConsole(uint w, uint h) {
     std::string size = "window: size=" + std::to_string(w) + "x" + std::to_string(h);
     terminal_set(size.c_str());
     //terminal_set("title='Project RLECS'");
-    terminal_set("font: default");
+    terminal_set("font: ../res/fonts/VeraMono.ttf, size=16x16");
     terminal_set("input: filter={keyboard}");
     terminal_color("black");
 }
