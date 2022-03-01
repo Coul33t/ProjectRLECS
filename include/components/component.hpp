@@ -81,8 +81,31 @@ struct Renderable {
     char glyph, glyph_dead;
     color_t colour, colour_dead;
     
-    Renderable() {};
+    Renderable() {
+        glyph = 'x';
+        glyph_dead = '%';
+        colour = red;
+        colour_dead = dark_red;
+    };
 
     Renderable(char glyph, char glyph_dead='%', color_t colour=red, color_t colour_dead=dark_red): 
         glyph(glyph), glyph_dead(glyph_dead), colour(colour), colour_dead(colour_dead) {};
+};
+
+struct Target {
+    bool is_player;
+    mVec2<uint> coord;
+    flecs::entity target;
+
+    Target() {
+        is_player = false;
+        coord.x = 0;
+        coord.y = 0;
+    };
+
+    Target(bool is_player, uint x, uint y):
+        is_player(is_player) {
+            coord.x = x;
+            coord.y = y;
+        };
 };
