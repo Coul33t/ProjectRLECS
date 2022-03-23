@@ -63,6 +63,19 @@ void Gui::updateBarColours(std::string bar_name, color_t new_fg, color_t new_bg,
     }
 }
 
+void Gui::renderChar(uint x, uint y, char chr, color_t fg, color_t bg) {
+    terminal_bkcolor(bg);
+    terminal_color(fg);
+    terminal_put_ext(x + this->pos.x, y + this->pos.y, 0, 0, chr);
+}
+
+void Gui::renderString(uint x, uint y, std::string str, color_t fg, color_t bg) {
+    terminal_bkcolor(bg);
+    terminal_color(fg);
+    terminal_print(x + this->pos.x, y + this->pos.y, str.c_str());
+}
+
+
 /*void Gui::renderBars() {
     for (auto it_bar = bars.begin(); it_bar != bars.end(); it_bar++) {
         con->setDefaultBackground((*it_bar).bg);
