@@ -9,7 +9,8 @@ namespace EntFactories {
         player.set<Vision>(10);
         player.set<Stats>({"Exodius", 20, 20});
         player.set<Melee>(5);
-        player.set<Renderable>({'@', '%', green, dark_green});
+        player.set<Renderable>({'@', '%', Colours::green, Colours::dark_green});
+        player.add<Target>();
 
         // tags
         player.add<Player>();
@@ -26,7 +27,8 @@ namespace EntFactories {
         monster.set<Vision>(5);
         monster.set<Stats>({"Generic monster", 5, 5});
         monster.set<Melee>(1);
-        monster.set<Renderable>({glyph, '%', red, dark_red});
+        monster.set<Renderable>({glyph, '%', Colours::red, Colours::dark_red});
+        monster.add<Target>();
         
         // tags
         monster.add<Monster>();
