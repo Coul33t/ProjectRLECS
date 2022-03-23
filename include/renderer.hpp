@@ -39,6 +39,7 @@ class Renderer {
         ~Renderer();
 
         void initConsole(uint w, uint h);
+        void initPlayerBars(flecs::world& ecs_world);
         void setConsole(uint w, uint h);
 
         void renderChar(uint x, uint y, char chr,color_t fg, color_t bg);
@@ -49,11 +50,11 @@ class Renderer {
 
         void renderEntities(Map& map, flecs::world& ecs_world);
 
-        void renderStats();
+        void renderStats(flecs::world& ecs_world);
         void renderMessages();
         void renderInfo();
 
-        void renderGUIs();
+        void renderGUIs(flecs::world& ecs_world);
 
         Gui gui_messages, gui_stats, gui_info;
 };

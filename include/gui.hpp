@@ -11,8 +11,8 @@ struct ConTile {
 
     ConTile() {
         chr = ' ';
-        bg = black;
-        fg = white;
+        bg = Colours::black;
+        fg = Colours::white;
     }
 };
 
@@ -70,8 +70,6 @@ class Gui {
         Gui(uint x, uint y, uint width, uint height, std::string name);
         ~Gui();
 
-        void renderChar(uint x, uint y, char chr,color_t fg, color_t bg);
-
         void setGuiAttributes(std::string name, uint x, uint y, uint w, uint h);
 
         void addBar(uint x, uint y, uint width, std::string name, int val, 
@@ -80,6 +78,9 @@ class Gui {
         void updateBarPos(std::string bar_name, uint new_x, uint new_y);
         void updateBarVal(std::string bar_name, uint new_val, uint new_max_val);
         void updateBarColours(std::string bar_name, color_t new_fg, color_t new_bg, color_t new_msg_fg);
+
+        void renderChar(uint x, uint y, char chr,color_t fg, color_t bg);
+        void renderString(uint x, uint y, std::string str, color_t fg, color_t bg);
 
         /*void renderBars();
         
