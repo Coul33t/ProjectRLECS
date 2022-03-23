@@ -13,17 +13,17 @@ Engine::Engine(uint w, uint h) {
 }
 
 Engine::~Engine() {
-    
+
 }
 
 void Engine::initSystems() {
     // Player system
     ecs_world.system<Player>()
         .kind(flecs::OnUpdate)
-        .each([](flecs::entity e, Player& pl) {
+        .each([this](flecs::entity e, Player& pl) {
             // Motion
-            Velocity* v = e.get_mut<Velocity>();
-            Position* p = e.get_mut<Position>();
+            auto v = e.get_mut<Velocity>();
+            auto p = e.get_mut<Position>();
             if (v->dx != 0 || v->dy != 0) {
                 p->x += v->dx;
                 p->y += v->dy;
@@ -32,28 +32,27 @@ void Engine::initSystems() {
             }
 
             // attack
-            Melee* m = e.get_mut<Melee>();
+            auto t = e.get_mut<Target>();
 
-            if (m->target != flecs::entity::null()) {
-                Stats* enemy_stats = m->target.mut(e).get_mut<Stats>();
-                std::cout << e.get<Stats>()->name << " attacks the " << enemy_stats->name << " for " << e.get<Melee>()->dmg << " damage !" << std::endl;  
-                enemy_stats->hp -= e.get<Melee>()->dmg;
-                std::cout << enemy_stats->name << "hp: " << enemy_stats->hp << "/" << enemy_stats->max_hp << std::endl;
-                
-                if (enemy_stats->hp <= 0) {
-                    m->target.mut(e).remove<Alive>();                       
-                    m->target.mut(e).add<Dead>();                  
-                }
-
-                m->target = flecs::entity::null();
+            if (t->target != flecs::entity::null()) {
+                auto target_e = t->target.mut(e);
+                attack(e, target_e);
             }
     });
 
     // AI system
-    ecs_world.system<Position, Velocity, Monster, BasicAI, Alive>()
+    ecs_world.system<Position, Velocity, Monster, BasicAI, Alive, Target>()
         .kind(flecs::OnUpdate)
-        .each([](flecs::entity e, Position& p, Velocity& v, const Monster& m, const BasicAI& bai, Alive& a) {
+        .each([this](flecs::entity e, Position& p, Velocity& v, const Monster& m, const BasicAI& bai, Alive& a, Target& t) {
             
+            /*if(t.target != flecs::entity::null()) {
+
+            }
+
+            auto player = ecs_world.lookup("Player");
+            if(map.isInFov(p.x, p.y)) {
+                move(player.get<Position>()->x, player.get<Position>()->y, e);
+            }*/
     });
     
     // Move system
@@ -88,7 +87,7 @@ void Engine::populateMap() {
     TCODRandom* rng = TCODRandom::getInstance();
 
     // Player coordinates
-    const Position* pc = ecs_world.lookup("Player").get<Position>();
+    auto pc = ecs_world.lookup("Player").get<Position>();
 
     const uint max_tries_per_monster = 100;
     uint current_tries = 0;
@@ -123,7 +122,7 @@ void Engine::populateMap() {
 }
 
 bool Engine::isWalkable(uint x, uint y) {
-    const Position* pp = ecs_world.lookup("Player").get<Position>();
+    auto pp = ecs_world.lookup("Player").get<Position>();
     if (x == pp->x && y == pp->y)
         return false;
 
@@ -156,31 +155,53 @@ bool Engine::hasEnemy(uint x, uint y) {
 flecs::entity Engine::getEnemyAt(uint x, uint y) {
     flecs::entity enemy;
     
-    ecs_world.each([this, x, y, &enemy](flecs::entity e, const Position& p, const BlocksPath& bp, const Monster& m) {
-        if(p.x == x && p.y == y)
+    ecs_world.each([this, x, y, &enemy](const flecs::entity e, const Position& p, const BlocksPath& bp, const Monster& m) {
+        if(p.x == x && p.y == y) {
             enemy = e;
+        }
     });
 
     return enemy;
 }
 
-bool Engine::move(int dx, int dy) {
+bool Engine::move(int dx, int dy, flecs::entity& e) {
     bool has_moved = false;
 
-    ecs_world.each([this, dx, dy, &has_moved](const Player& pl, const Position& p, Velocity& v, Melee& m) {
-        if(isWalkable(p.x + dx, p.y + dy)) {
-            v.dx = dx;
-            v.dy = dy;
-            has_moved = true;
-        }
+    auto p = e.get_mut<Position>();
+    auto v = e.get_mut<Velocity>();
+    auto t = e.get_mut<Target>();
 
-        else if (hasEnemy(p.x + dx, p.y + dy)) {
-            m.target = getEnemyAt(p.x + dx, p.y + dy);
-            has_moved = true;
-        }
-    });
+    if(isWalkable(p->x + dx, p->y + dy)) {
+        v->dx = dx;
+        v->dy = dy;
+        has_moved = true;
+    }
+
+    else if (hasEnemy(p->x + dx, p->y + dy)) {
+        t->target = getEnemyAt(p->x + dx, p->y + dy);
+        has_moved = true;
+    }
     
     return has_moved;
+}
+
+void Engine::attack(flecs::entity& origin, flecs::entity& target) {
+    auto enemy_stats = target.get_mut<Stats>();
+    auto origin_melee = origin.get_mut<Melee>();
+
+    std::cout << origin.get<Stats>()->name << " attacks the " << enemy_stats->name << 
+                 " for " << origin_melee->dmg << " damage !" << std::endl;  
+
+    enemy_stats->hp -= origin_melee->dmg;
+
+    std::cout << enemy_stats->name << "hp: " << enemy_stats->hp << "/" << enemy_stats->max_hp << std::endl;
+
+    if (enemy_stats->hp <= 0) {
+        target.remove<Alive>();                       
+        target.add<Dead>();                  
+    }
+
+    origin.get_mut<Target>()->target = flecs::entity::null();
 }
 
 void Engine::run() {
@@ -197,6 +218,8 @@ void Engine::run() {
     populateMap();
 
     map.computeFov(player);
+
+    renderer.initPlayerBars(ecs_world);
 
     bool compute_fov = false;
 
@@ -244,7 +267,8 @@ void Engine::run() {
             default: break;
         }
 
-        has_moved = move(dir.x, dir.y);
+        if(!(dir.x == 0 && dir.y == 0))
+            has_moved = move(dir.x, dir.y, player);
 
         if (has_moved) {
             game_state = GameState::TOOK_TURN;
@@ -261,7 +285,7 @@ void Engine::run() {
         
         renderer.renderMap(map, false); // true for debug
         renderer.renderEntities(map, ecs_world);
-        renderer.renderGUIs();
+        renderer.renderGUIs(ecs_world);
 
         terminal_refresh();
     }
