@@ -1,3 +1,9 @@
-.vscode/
 build/
 extlib/
+
+# VSCode stuff
+.vscode/
+
+# CLion stuff
+cmake-build-debug/
+.idea/
