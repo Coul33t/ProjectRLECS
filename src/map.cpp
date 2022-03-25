@@ -6,7 +6,7 @@ Map::Map() {
     
     map.reserve(size.w * size.h);
     for (size_t i = 0; i < size.w * size.h; i++)
-        map.push_back(new Tile(false));
+        map.emplace_back(Tile(false));
 
     tcod_map = new TCODMap(size.w, size.h);
 }
@@ -17,26 +17,26 @@ Map::Map(uint w, uint h) {
     
     map.reserve(size.w * size.h);
     for (size_t i = 0; i < size.w * size.h; i++)
-        map.push_back(new Tile(false));
+        map.emplace_back(Tile(false));
 
     tcod_map = new TCODMap(size.w, size.h);
 }
 
 Map::~Map() {
-    for (Tile* t: map)
-        delete t;
+    /*for (Tile& t: map)
+        delete t;*/
 
-    for (Room* r: rooms)
-        delete r;
+    /*for (Room* r: rooms)
+        delete r;*/
     
     delete tcod_map;
 }
 
-Tile* Map::getTile(uint x, uint y) const {
+Tile& Map::getTile(uint x, uint y) {
     return map[coordinates2dto1d(x, y)];
 }
 
-Room* Map::getRoom(uint idx)  const {
+Room& Map::getRoom(uint idx) {
     if (idx > rooms.size() - 1) {
         std::cout << "WARNING: idx is bigger than size of rooms vector. Returning last room instead." << std::endl;
         return rooms.back();
@@ -45,7 +45,7 @@ Room* Map::getRoom(uint idx)  const {
     return rooms[idx];
 }
 
-const std::vector<Room*>& Map::getRooms() const {
+const std::vector<Room>& Map::getRooms() const {
     return rooms;
 }
 
@@ -56,7 +56,7 @@ void Map::setSize(uint w, uint h) {
     
     map.reserve(size.w * size.h);
     for (size_t i = 0; i < size.w * size.h; i++)
-        map.push_back(new Tile(false));
+        map.emplace_back(Tile(false));
 
     tcod_map = new TCODMap(size.w, size.h);
 }
@@ -66,38 +66,38 @@ uint Map::coordinates2dto1d(uint x, uint y) const {
 }
 
 void Map::setWall(uint x, uint y) {
-    map[coordinates2dto1d(x, y)]->walkable = false;
+    map[coordinates2dto1d(x, y)].walkable = false;
     tcod_map->setProperties(x, y, false, false);
 }
 
 void Map::setFloor(uint x, uint y) {
-    map[coordinates2dto1d(x, y)]->walkable = true;
-    map[coordinates2dto1d(x, y)]->transparent = true;
+    map[coordinates2dto1d(x, y)].walkable = true;
+    map[coordinates2dto1d(x, y)].transparent = true;
     tcod_map->setProperties(x, y, true, true);
 }
 
 bool Map::isWalkable(uint x, uint y)  const {
-    return map[coordinates2dto1d(x, y)]->walkable;
+    return map[coordinates2dto1d(x, y)].walkable;
 }
 
 bool Map::isExplored(uint x, uint y)  const {
-    return map[coordinates2dto1d(x, y)]->explored;
+    return map[coordinates2dto1d(x, y)].explored;
 }
 
 bool Map::isInFov(uint x, uint y) {
     if(tcod_map->isInFov(x, y)) {
-        map[coordinates2dto1d(x, y)]->explored = true;
+        map[coordinates2dto1d(x, y)].explored = true;
         return true;
     }
     
     return false;
 }
 
-void Map::computeFov(uint x, uint y, uint vision_radius) {
+void Map::computeFov(uint x, uint y, uint vision_radius) const {
     tcod_map->computeFov(x, y, vision_radius, true);
 }
 
-void Map::computeFov(flecs::entity player) {
+void Map::computeFov(const flecs::entity& player) const {
     tcod_map->computeFov(player.get<Position>()->x, 
                          player.get<Position>()->y, 
                          player.get<Vision>()->fov_radius, 
@@ -148,12 +148,12 @@ void Map::dig(int x1, int y1, int x2, int y2) {
         }
     }
 
-    rooms.push_back(new Room(x1, y1, x2 - x1, y2 - y1));
+    rooms.emplace_back(Room(x1, y1, x2 - x1, y2 - y1));
 }
 
 void Map::createBSPMap() {
     TCODBsp bsp(0, 0, size.w, size.h);
-    bsp.splitRecursive(NULL, 8, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
+    bsp.splitRecursive(nullptr, 8, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
     BspListener listener(*this);
-    bsp.traverseInvertedLevelOrder(&listener, NULL);
+    bsp.traverseInvertedLevelOrder(&listener, nullptr);
 }

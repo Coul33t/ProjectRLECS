@@ -15,8 +15,16 @@ static const uint ROOM_MIN_SIZE = 3;
 
 struct Tile {
     bool walkable, explored, transparent;
+    int graphic_idx;
     Tile(bool walkable=true, bool explored=false, bool transparent=false): 
-        walkable(walkable), explored(explored), transparent(transparent) {}
+        walkable(walkable), explored(explored), transparent(transparent) {
+
+        graphic_idx = -1;
+    }
+
+    bool isWall() {
+        return (!walkable);
+    }
 };
 
 struct Room {
@@ -29,7 +37,7 @@ struct Room {
         this->h = h;
     }
 
-    mVec2<uint> getCenter() {
+    mVec2<uint> getCenter() const {
         mVec2<uint> center;
         center.x = this->x + (this->w / 2);
         center.y = this->y + (this->h / 2);
@@ -44,12 +52,12 @@ class Map {
 
         ~Map();
 
-        Room* getRoom(uint idx)  const;
-        const std::vector<Room*>& getRooms() const;
+        Room& getRoom(uint idx);
+        const std::vector<Room>& getRooms() const;
 
         void setSize(uint w, uint h);
 
-        Tile* getTile(uint x, uint y) const;
+        Tile& getTile(uint x, uint y);
 
         uint coordinates2dto1d(uint x, uint y) const;
 
@@ -60,14 +68,14 @@ class Map {
         bool isExplored(uint x, uint y) const;
         bool isInFov(uint x, uint y);
 
-        void computeFov(uint x, uint y, uint vision_radius);
-        void computeFov(flecs::entity player);
+        void computeFov(uint x, uint y, uint vision_radius) const;
+        void computeFov(const flecs::entity& player) const;
         
         void createEmptyMap();
 
         mVec2<uint16_t> size;
-        std::vector<Tile*> map;
-        std::vector<Room*> rooms;
+        std::vector<Tile> map;
+        std::vector<Room> rooms;
         void dig(int x1, int y1, int x2, int y2);
         void createBSPMap();
         TCODMap* tcod_map;
