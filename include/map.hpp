@@ -16,13 +16,19 @@ static const uint ROOM_MIN_SIZE = 3;
 struct Tile {
     bool walkable, explored, transparent;
     int graphic_idx;
+    color_t fg, bg, fog_fg, fog_bg;
+
     Tile(bool walkable=true, bool explored=false, bool transparent=false): 
         walkable(walkable), explored(explored), transparent(transparent) {
 
         graphic_idx = -1;
+        fg = Colours::white;
+        bg = Colours::default_bg;
+        fog_fg = Colours::dark_grey;
+        fog_bg = Colours::default_bg;
     }
 
-    bool isWall() {
+    bool isWall() const {
         return (!walkable);
     }
 };
