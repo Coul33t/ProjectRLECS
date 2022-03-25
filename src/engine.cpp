@@ -72,7 +72,6 @@ void Engine::initSystems() {
 void Engine::initRenderer(uint w, uint h) {
     renderer.setConsole(w, h);
     onebitpack::initMapping(renderer.gt);
-    onebitpack::setGraphicsToTiles(map, renderer.gt);
 }
 
 
@@ -211,6 +210,7 @@ void Engine::run() {
     initSystems();
 
     map.createBSPMap();
+    onebitpack::setGraphicsToTiles(map, renderer.gt);
 
     uint x = 0;
     uint y = 0;
