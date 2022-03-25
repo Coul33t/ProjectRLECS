@@ -85,28 +85,21 @@ void Renderer::renderTileASCII(Map& map, uint x, uint y, bool debug) {
 }
 
 void Renderer::renderTileGraphics(Map& map, uint x, uint y, bool debug) {
+    Tile tile = map.getTile(x, y);
+
     if (debug) {
-        if (map.isWalkable(x, y))
+        if (tile.walkable)
             renderChar(x, y, '.', Colours::light_ground, Colours::default_bg);
         else
             renderChar(x, y, '#', Colours::light_wall, Colours::default_bg);
     }
 
     else {
-        if(map.isInFov(x, y)) {   
-            if (map.isWalkable(x, y))
-                renderTile(map.getTile(x, y), x, y, Colours::light_ground, Colours::default_bg);
-            else
-                renderTile(map.getTile(x, y), x, y, Colours::light_ground, Colours::default_bg);
-        }
+        if(map.isInFov(x, y))
+            renderTile(map.getTile(x, y), x, y, tile.fg, tile.bg);
 
-        else if(map.isExplored(x, y)) {
-            if (map.isWalkable(x, y))
-                renderChar(x, y, '.', Colours::dark_ground, Colours::default_bg);
-            else
-                renderChar(x, y, '#', Colours::dark_wall, Colours::default_bg);
-
-        }
+        else if(map.isExplored(x, y))
+            renderTile(map.getTile(x, y), x, y, tile.fog_fg, tile.fog_bg);
     }
 }
 
