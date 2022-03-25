@@ -28,11 +28,11 @@ namespace onebitpack {
     }
 
     void setGraphicsToTiles(Map& map, GraphicTileset& gt) {
-        for (Tile tile: map.map) {
+        for (Tile& tile: map.map) {
             if (tile.isWall())
                 tile.graphic_idx = gt.getTile("wall");
             else
-                tile.graphic_idx = gt.getRandomGround();
+                tile.graphic_idx = gt.getTile("void");
         }
     }
 }
