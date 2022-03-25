@@ -25,6 +25,7 @@ void Renderer::initConsole(uint w, uint h) {
     //terminal_set("title='Project RLECS'");
     terminal_set("font: ../res/fonts/VeraMono.ttf, size=16x16");
     terminal_set("input: filter={keyboard}");
+    terminal_set("0x1000: ../res/tilesets/1bitpack_kenney/monochrome_packed.png, size=16x16");
     terminal_color("black");
 }
 
@@ -51,7 +52,13 @@ void Renderer::renderString(uint x, uint y, std::string str, color_t fg, color_t
     terminal_print(x, y, str.c_str());
 }
 
-void Renderer::renderTile(Map& map, uint x, uint y, bool debug) {
+void Renderer::renderTile(Tile& tile, uint x, uint y, color_t fg, color_t bg) {
+    terminal_bkcolor(bg);
+    terminal_color(fg);
+    terminal_put_ext(x, y, 0, 0, tile.graphic_idx);
+}
+
+void Renderer::renderTileASCII(Map& map, uint x, uint y, bool debug) {
     if (debug) {
         if (map.isWalkable(x, y))
             renderChar(x, y, '.', Colours::light_ground, Colours::default_bg);
@@ -77,12 +84,41 @@ void Renderer::renderTile(Map& map, uint x, uint y, bool debug) {
     }
 }
 
+void Renderer::renderTileGraphics(Map& map, uint x, uint y, bool debug) {
+    if (debug) {
+        if (map.isWalkable(x, y))
+            renderChar(x, y, '.', Colours::light_ground, Colours::default_bg);
+        else
+            renderChar(x, y, '#', Colours::light_wall, Colours::default_bg);
+    }
+
+    else {
+        if(map.isInFov(x, y)) {   
+            if (map.isWalkable(x, y))
+                renderTile(map.getTile(x, y), x, y, Colours::light_ground, Colours::default_bg);
+            else
+                renderTile(map.getTile(x, y), x, y, Colours::light_ground, Colours::default_bg);
+        }
+
+        else if(map.isExplored(x, y)) {
+            if (map.isWalkable(x, y))
+                renderChar(x, y, '.', Colours::dark_ground, Colours::default_bg);
+            else
+                renderChar(x, y, '#', Colours::dark_wall, Colours::default_bg);
+
+        }
+    }
+}
+
 void Renderer::renderMap(Map& map, bool debug) {
     terminal_bkcolor(Colours::black);
 
     for(size_t y = 0; y < map.size.h; y++) {
         for (size_t x = 0; x < map.size.w; x++) {
-            renderTile(map, x, y, debug);
+            if (render_ascii)
+                renderTileASCII(map, x, y, debug);
+            else
+                renderTileGraphics(map, x, y, debug);
         }
     }
 }

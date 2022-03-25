@@ -12,6 +12,8 @@
 #include "components/component.hpp"
 #include "tags/tags.hpp"
 
+#include "graphic_tileset.hpp"
+
 const uint MAP_POSITION_X = 0;
 const uint MAP_POSITION_Y = 0;
 const uint MAP_SIZE_W = 50;
@@ -44,7 +46,10 @@ class Renderer {
 
         void renderChar(uint x, uint y, char chr,color_t fg, color_t bg);
         void renderString(uint x, uint y, std::string str, color_t fg, color_t bg);
-        void renderTile(Map& map, uint x, uint y, bool debug);
+        void renderTile(Tile& tile, uint x, uint y, color_t fg, color_t bg);
+
+        void renderTileASCII(Map& map, uint x, uint y, bool debug);
+        void renderTileGraphics(Map& map, uint x, uint y, bool debug);
 
         void renderMap(Map& map, bool debug=false);
 
@@ -57,4 +62,6 @@ class Renderer {
         void renderGUIs(flecs::world& ecs_world);
 
         Gui gui_messages, gui_stats, gui_info;
+        bool render_ascii = true;
+        GraphicTileset gt;
 };
