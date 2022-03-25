@@ -6,7 +6,8 @@ namespace Colours {
     static const color_t default_bg = color_from_argb(255, 0, 0, 0); 
 
     static const color_t black = color_from_argb(255, 0, 0, 0); 
-    static const color_t white = color_from_argb(255, 255, 255, 255); 
+    static const color_t white = color_from_argb(255, 255, 255, 255);
+    static const color_t dark_grey = color_from_argb(255, 50, 50, 50);
 
     static const color_t light_wall = color_from_argb(255, 130, 110, 50);
     static const color_t light_ground = color_from_argb(255, 200, 180, 50);
