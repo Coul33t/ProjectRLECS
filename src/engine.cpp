@@ -71,6 +71,8 @@ void Engine::initSystems() {
 
 void Engine::initRenderer(uint w, uint h) {
     renderer.setConsole(w, h);
+    onebitpack::initMapping(renderer.gt);
+    onebitpack::setGraphicsToTiles(map, renderer.gt);
 }
 
 
@@ -82,7 +84,7 @@ void Engine::populateMap() {
     const uint max_monster_per_room = 5;
     uint nb_monsters = 0;
 
-    std::vector<Room*> rooms = map.getRooms();
+    std::vector<Room> rooms = map.getRooms();
 
     TCODRandom* rng = TCODRandom::getInstance();
 
@@ -104,8 +106,8 @@ void Engine::populateMap() {
                 current_tries++;
                 has_enemy = false;
 
-                x = rng->getInt((*it)->x, (*it)->x + (*it)->w);
-                y = rng->getInt((*it)->y, (*it)->y + (*it)->h);
+                x = rng->getInt((*it).x, (*it).x + (*it).w);
+                y = rng->getInt((*it).y, (*it).y + (*it).h);
 
                 ecs_world.each([&has_enemy, &x, &y](const Position& p, const Monster& m) { // flecs::entity argument is optional
                     if (p.x == x && p.y == y) {
@@ -212,7 +214,7 @@ void Engine::run() {
 
     uint x = 0;
     uint y = 0;
-    mVec2<uint> center = map.getRoom(0)->getCenter();
+    mVec2<uint> center = map.getRoom(0).getCenter();
 
     player = EntFactories::createPlayer(ecs_world, center.x, center.y);
     populateMap();
@@ -262,6 +264,10 @@ void Engine::run() {
             case TK_RIGHT :
                 dir.x = 1;
                 dir.y = 0;
+                break;
+
+            case TK_P:
+                renderer.render_ascii = !renderer.render_ascii;
                 break;
 
             default: break;
