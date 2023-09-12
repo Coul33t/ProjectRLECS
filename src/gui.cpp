@@ -18,9 +18,7 @@ Gui::Gui(uint x, uint y, uint width, uint height, std::string name) {
     name = name;
 }
 
-Gui::~Gui() {
-    //delete con;
-}
+Gui::~Gui() = default;
 
 void Gui::setGuiAttributes(std::string name, uint x, uint y, uint w, uint h) {
     this->name = name;
@@ -32,44 +30,44 @@ void Gui::setGuiAttributes(std::string name, uint x, uint y, uint w, uint h) {
 
 void Gui::addBar(uint x, uint y, uint width, std::string name, int val, 
                  uint max_val, color_t fg, color_t bg, color_t msg_fg) {
-    bars.push_back(Bar(x, y, width, name, val, max_val, fg, bg, msg_fg));
+    bars.emplace_back(Bar(x, y, width, name, val, max_val, fg, bg, msg_fg));
 }
 
-void Gui::updateBarPos(std::string bar_name, uint new_x, uint new_y) {
-    for (auto it = bars.begin(); it != bars.end(); it++) {
-        if ((*it).name == bar_name) {
-            (*it).x = new_x;
-            (*it).y = new_y;
+void Gui::updateBarPos(std::string& bar_name, uint new_x, uint new_y) {
+    for (Bar bar: bars) {
+        if (bar.name == bar_name) {
+            bar.x = new_x;
+            bar.y = new_y;
         }
     }
 }
 
-void Gui::updateBarVal(std::string bar_name, uint new_val, uint new_max_val) {
-    for (auto it = bars.begin(); it != bars.end(); it++) {
-        if ((*it).name == bar_name) {
-            (*it).max_val = new_max_val;
-            (*it).val = new_val;
+void Gui::updateBarVal(std::string& bar_name, int new_val, uint new_max_val) {
+    for (Bar bar: bars) {
+        if (bar.name == bar_name) {
+            bar.max_val = new_max_val;
+            bar.val = new_val;
         }
     }
 }
 
-void Gui::updateBarColours(std::string bar_name, color_t new_fg, color_t new_bg, color_t new_msg_fg) {
-    for (auto it = bars.begin(); it != bars.end(); it++) {
-        if ((*it).name == bar_name) {
-            (*it).fg = new_fg;
-            (*it).bg = new_bg;
-            (*it).msg_fg = new_msg_fg;
+void Gui::updateBarColours(std::string& bar_name, color_t new_fg, color_t new_bg, color_t new_msg_fg) {
+    for (Bar bar: bars) {
+        if (bar.name == bar_name) {
+            bar.fg = new_fg;
+            bar.bg = new_bg;
+            bar.msg_fg = new_msg_fg;
         }
     }
 }
 
-void Gui::renderChar(uint x, uint y, char chr, color_t fg, color_t bg) {
+void Gui::renderChar(uint x, uint y, char chr, color_t fg, color_t bg) const {
     terminal_bkcolor(bg);
     terminal_color(fg);
     terminal_put_ext(x + this->pos.x, y + this->pos.y, 0, 0, chr);
 }
 
-void Gui::renderString(uint x, uint y, std::string str, color_t fg, color_t bg) {
+void Gui::renderString(uint x, uint y, std::string str, color_t fg, color_t bg) const {
     terminal_bkcolor(bg);
     terminal_color(fg);
     terminal_print(x + this->pos.x, y + this->pos.y, str.c_str());
