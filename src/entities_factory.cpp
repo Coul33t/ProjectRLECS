@@ -4,7 +4,9 @@ namespace EntFactories {
     flecs::entity createPlayer(flecs::world& ecs_world, uint x, uint y) {
         flecs::entity player = ecs_world.entity("Player");
         // components
-        player.set<Position>({x, y});
+        int x_int = static_cast<int>(x);
+        int y_int = static_cast<int>(y);
+        player.set<Position>({x_int, y_int});
         player.add<Velocity>();
         player.set<Vision>(10);
         player.set<Stats>({"Exodius", 20, 20});
@@ -22,7 +24,9 @@ namespace EntFactories {
     flecs::entity createMonster(flecs::world& ecs_world, uint x, uint y, char glyph) {
         flecs::entity monster = ecs_world.entity();
         // components
-        monster.set<Position>({x, y});
+        int x_int = static_cast<int>(x);
+        int y_int = static_cast<int>(y);
+        monster.set<Position>({x_int, y_int});
         monster.add<Velocity>();
         monster.set<Vision>(5);
         monster.set<Stats>({"Generic monster", 5, 5});
