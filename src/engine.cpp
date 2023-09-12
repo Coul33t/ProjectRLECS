@@ -12,9 +12,7 @@ Engine::Engine(uint w, uint h) {
     initRenderer(w, h);
 }
 
-Engine::~Engine() {
-
-}
+Engine::~Engine() = default;
 
 void Engine::initSystems() {
     // Player system
@@ -44,15 +42,16 @@ void Engine::initSystems() {
     ecs_world.system<Position, Velocity, Monster, BasicAI, Alive, Target>()
         .kind(flecs::OnUpdate)
         .each([this](flecs::entity e, Position& p, Velocity& v, const Monster& m, const BasicAI& bai, Alive& a, Target& t) {
-            
-            /*if(t.target != flecs::entity::null()) {
-
-            }
 
             auto player = ecs_world.lookup("Player");
             if(map.isInFov(p.x, p.y)) {
-                move(player.get<Position>()->x, player.get<Position>()->y, e);
-            }*/
+                t.coord.x = player.get<Position>()->x;
+                t.coord.y = player.get<Position>()->y;
+            }
+
+            if(!(t.coord.x == p.x && t.coord.y == p.y)) {
+                move_to(t.coord.x, t.coord.y, e);
+            }
     });
     
     // Move system
@@ -81,7 +80,7 @@ void Engine::initMap(uint w, uint h) {
 
 void Engine::populateMap() {
     const uint max_monster_per_room = 5;
-    uint nb_monsters = 0;
+    uint nb_monsters;
 
     std::vector<Room> rooms = map.getRooms();
 
@@ -91,9 +90,9 @@ void Engine::populateMap() {
     auto pc = ecs_world.lookup("Player").get<Position>();
 
     const uint max_tries_per_monster = 100;
-    uint current_tries = 0;
+    uint current_tries;
 
-    for (auto it = rooms.begin(); it != rooms.end(); it++) {
+    for (Room& room: rooms) {
         nb_monsters = rng->getInt(0, max_monster_per_room);
         
         for (size_t i = 0; i < nb_monsters; i++) {
@@ -105,8 +104,8 @@ void Engine::populateMap() {
                 current_tries++;
                 has_enemy = false;
 
-                x = rng->getInt((*it).x, (*it).x + (*it).w);
-                y = rng->getInt((*it).y, (*it).y + (*it).h);
+                x = rng->getInt(room.x, room.x + room.w);
+                y = rng->getInt(room.y, room.y + room.h);
 
                 ecs_world.each([&has_enemy, &x, &y](const Position& p, const Monster& m) { // flecs::entity argument is optional
                     if (p.x == x && p.y == y) {
@@ -116,36 +115,42 @@ void Engine::populateMap() {
 
             } while((has_enemy || (x == pc->x && y == pc->y)) && current_tries < max_tries_per_monster);
 
-            if (current_tries < max_tries_per_monster)
+            if (current_tries < max_tries_per_monster) {
                 EntFactories::createMonster(ecs_world, x, y, 'x');
+            }
+
         }
     }
 }
 
 bool Engine::isWalkable(uint x, uint y) {
     auto pp = ecs_world.lookup("Player").get<Position>();
-    if (x == pp->x && y == pp->y)
+    if (x == pp->x && y == pp->y) {
         return false;
+    }
 
-    if(!map.isWalkable(x, y))
+    if(!map.isWalkable(x, y)) {
         return false;
+    }
 
     bool walkable = true;
 
     // If the entity blocks path, is alive and position == next move, can't go there
     ecs_world.each([x, y, &walkable](flecs::entity e, const Position& p, const BlocksPath& bp, const Alive& a) {
-        if (!e.has<Player>())
-            if(p.x == x && p.y == y)
+        if (!e.has<Player>()) {
+            if(p.x == x && p.y == y) {
                 walkable = false;
+            }
+        }
     });
 
     return walkable;
 }
 
-bool Engine::hasEnemy(uint x, uint y) {
+bool Engine::hasEntity(uint x, uint y) {
     bool enemy_found = false;
     
-    ecs_world.each([x, y, &enemy_found](const Position& p, const BlocksPath& bp, const Monster& m) {
+    ecs_world.each([x, y, &enemy_found](const Position& p, const BlocksPath& bp) {
         if(p.x == x && p.y == y)
             enemy_found = true;
     });
@@ -156,7 +161,7 @@ bool Engine::hasEnemy(uint x, uint y) {
 flecs::entity Engine::getEnemyAt(uint x, uint y) {
     flecs::entity enemy;
     
-    ecs_world.each([this, x, y, &enemy](const flecs::entity e, const Position& p, const BlocksPath& bp, const Monster& m) {
+    ecs_world.each([this, x, y, &enemy](const flecs::entity e, const Position& p, const BlocksPath& bp) {
         if(p.x == x && p.y == y) {
             enemy = e;
         }
@@ -166,24 +171,54 @@ flecs::entity Engine::getEnemyAt(uint x, uint y) {
 }
 
 bool Engine::move(int dx, int dy, flecs::entity& e) {
-    bool has_moved = false;
+    bool took_turn = false;
 
-    auto p = e.get_mut<Position>();
+    auto p = e.get<Position>();
     auto v = e.get_mut<Velocity>();
     auto t = e.get_mut<Target>();
 
+    // TODO: error here, sometimes p->x is negative and thus isWalkable crashes
+    //  (casting negative int to uint makes number go brrrrrr)
     if(isWalkable(p->x + dx, p->y + dy)) {
         v->dx = dx;
         v->dy = dy;
-        has_moved = true;
+        took_turn = true;
     }
 
-    else if (hasEnemy(p->x + dx, p->y + dy)) {
+
+    else if (hasEntity(p->x + dx, p->y + dy)) {
         t->target = getEnemyAt(p->x + dx, p->y + dy);
-        has_moved = true;
+        took_turn = true;
     }
-    
-    return has_moved;
+
+    return took_turn;
+}
+
+bool Engine::move_to(int x, int y, flecs::entity& e) {
+    bool took_turn = false;
+
+    auto p = e.get<Position>();
+
+    if(Tools::dst(x, y, p->x, p->y) < 1) {
+        return took_turn;
+    }
+
+    // TODO: A*, of course
+    int next_x, next_y;
+    // Avoid dividing by 0
+    if (x == p->x)
+        next_x = 0;
+    else
+        // Normalising to 1
+        next_x = (x - p->x) / abs(x - p->x);
+
+    if (y == p->y)
+        next_y = 0;
+    else
+        // Normalising to 1
+        next_y = (y - p->y) / abs(y - p->y);
+
+    return move(next_x, next_y, e);
 }
 
 void Engine::attack(flecs::entity& origin, flecs::entity& target) {
@@ -212,23 +247,19 @@ void Engine::run() {
     map.createBSPMap();
     onebitpack::setGraphicsToTiles(map, renderer.gt);
 
-    uint x = 0;
-    uint y = 0;
     mVec2<uint> center = map.getRoom(0).getCenter();
 
     player = EntFactories::createPlayer(ecs_world, center.x, center.y);
+    auto p = player.get<Position>();
+    std::cout << p->x << ", " << p->y << std::endl;
     populateMap();
 
     map.computeFov(player);
 
     renderer.initPlayerBars(ecs_world);
-
-    bool compute_fov = false;
-
     terminal_refresh();
 
     int key;
-    bool key_pressed = false;
     bool has_moved = false;
     
     while (terminal_peek() != TK_CLOSE) {
@@ -238,10 +269,9 @@ void Engine::run() {
         
         if (terminal_has_input()) {
             key = terminal_read();
-            key_pressed = true;
         }
 
-        mVec2<uint> dir;
+        mVec2<int> dir{};
         dir.x = 0;
         dir.y = 0;
 
@@ -280,7 +310,6 @@ void Engine::run() {
             game_state = GameState::TOOK_TURN;
             dir.x = 0;
             dir.y = 0;
-            key_pressed = false;
             has_moved = false;
         }
 

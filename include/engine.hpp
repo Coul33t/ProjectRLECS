@@ -35,9 +35,10 @@ class Engine {
         void populateMap();
 
         bool isWalkable(uint x, uint y);
-        bool hasEnemy(uint x, uint y);
+        bool hasEntity(uint x, uint y);
         flecs::entity getEnemyAt(uint x, uint y);
         bool move(int dx, int dy, flecs::entity& e);
+        bool move_to(int x, int y, flecs::entity& e);
         void attack(flecs::entity& origin, flecs::entity& target);
 
         void run();
