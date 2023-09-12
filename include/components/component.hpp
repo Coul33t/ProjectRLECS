@@ -12,9 +12,9 @@
 #include "../colours.hpp"
 
 struct Position {
-    uint x, y;
+    int x, y;
 
-    Position(uint x=0, uint y=0): x(x), y(y) {};
+    Position(int x=0, int y=0): x(x), y(y) {};
 };
 
 struct Velocity {
@@ -94,16 +94,17 @@ struct Renderable {
 
 struct Target {
     bool is_player;
-    mVec2<uint> coord;
+    mVec2<int> coord;
     flecs::entity target;
 
     Target() {
         is_player = false;
         coord.x = 0;
         coord.y = 0;
+        target = flecs::entity::null();
     };
 
-    Target(bool is_player, uint x, uint y):
+    Target(bool is_player, int x, int y):
         is_player(is_player) {
             coord.x = x;
             coord.y = y;
