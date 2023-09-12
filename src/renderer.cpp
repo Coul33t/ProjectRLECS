@@ -139,8 +139,8 @@ void Renderer::renderEntities(Map& map, flecs::world& ecs_world) {
     
     // Draw the player the last so it's always on the top of everything
     flecs::entity player = ecs_world.lookup("Player");
-    const Position* p = player.get<Position>();
-    const Renderable* r = player.get<Renderable>();
+    auto p = player.get<Position>();
+    auto r = player.get<Renderable>();
     renderChar(p->x, p->y, r->glyph, r->colour, Colours::default_bg);
 }
 
@@ -149,14 +149,14 @@ void Renderer::renderStats(flecs::world& ecs_world) {
     auto melee = ecs_world.lookup("Player").get<Melee>();
 
     // Render the bars
-    for (auto it_bar = gui_stats.bars.begin(); it_bar != gui_stats.bars.end(); it_bar++) {
-        std::string bg_bar = std::string((*it_bar).width, ' ');
-        renderString((*it_bar).x + gui_stats.pos.x, (*it_bar).y + gui_stats.pos.y, bg_bar, (*it_bar).bg, (*it_bar).bg);     
+    for (const Bar& bar: gui_stats.bars) {
+        std::string bg_bar = std::string(bar.width, ' ');
+        renderString(bar.x + gui_stats.pos.x, bar.y + gui_stats.pos.y, bg_bar, bar.bg, bar.bg);
         
-        int fill_width = (int)((float)(*it_bar).val / (float)(*it_bar).max_val * (float)(*it_bar).width);
+        int fill_width = (int)((float)bar.val / (float)bar.max_val * (float)bar.width);
 
         std::string fg_bar = std::string(fill_width, ' ');
-        renderString((*it_bar).x + gui_stats.pos.x, (*it_bar).y + gui_stats.pos.y, fg_bar, (*it_bar).fg, (*it_bar).fg);     
+        renderString(bar.x + gui_stats.pos.x, bar.y + gui_stats.pos.y, fg_bar, bar.fg, bar.fg);
     }
 
     gui_stats.renderString(1, 2, std::string("Melee dmg: " + std::to_string(melee->dmg)), Colours::white, Colours::default_bg);
